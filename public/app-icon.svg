@@ -1,0 +1,27 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d9ff"/>
+      <stop offset="50%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="102" fill="url(#bgGradient)"/>
+
+  <!-- Flow "F" stylized as video/play symbol -->
+  <path d="M160 128 L160 384 L200 384 L200 272 L320 272 L320 232 L200 232 L200 168 L340 168 L340 128 L160 128Z" fill="url(#flowGradient)"/>
+
+  <!-- Play triangle accent -->
+  <path d="M280 300 L280 380 L360 340 Z" fill="url(#flowGradient)" opacity="0.9"/>
+
+  <!-- Subtle flow lines -->
+  <path d="M380 140 Q420 200 380 260" stroke="url(#flowGradient)" stroke-width="8" fill="none" opacity="0.6" stroke-linecap="round"/>
+  <path d="M400 160 Q440 210 400 260" stroke="url(#flowGradient)" stroke-width="6" fill="none" opacity="0.4" stroke-linecap="round"/>
+</svg>

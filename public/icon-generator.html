@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FlowV App Icon</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      background: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: system-ui;
+      color: white;
+    }
+    .icon-container {
+      width: 1024px;
+      height: 1024px;
+    }
+    p { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="icon-container">
+    <svg width="1024" height="1024" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1a1a2e"/>
+          <stop offset="100%" style="stop-color:#0f0f1a"/>
+        </linearGradient>
+        <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#00d9ff"/>
+          <stop offset="50%" style="stop-color:#a855f7"/>
+          <stop offset="100%" style="stop-color:#ec4899"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Rounded square background -->
+      <rect width="512" height="512" rx="102" fill="url(#bgGradient)"/>
+
+      <!-- Stylized "F" with play button integrated -->
+      <path d="M150 120 L150 392 L198 392 L198 280 L290 280 L290 235 L198 235 L198 165 L310 165 L310 120 L150 120Z" fill="url(#flowGradient)"/>
+
+      <!-- Play button / V shape -->
+      <path d="M270 290 L270 392 L370 341 Z" fill="url(#flowGradient)"/>
+
+      <!-- Flow accent lines -->
+      <path d="M340 130 Q390 180 370 240" stroke="url(#flowGradient)" stroke-width="12" fill="none" opacity="0.5" stroke-linecap="round"/>
+      <path d="M365 145 Q410 190 395 245" stroke="url(#flowGradient)" stroke-width="8" fill="none" opacity="0.3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <p>Right-click the icon above → "Save image as..." → Save as PNG</p>
+  <p>Or take a screenshot of just the icon (1024x1024)</p>
+</body>
+</html>
