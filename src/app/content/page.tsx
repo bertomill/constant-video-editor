@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 
@@ -27,7 +27,7 @@ const platformColors: Record<string, string> = {
 
 type FilterType = "all" | "youtube" | "instagram" | "x" | "medium";
 
-export default function ContentPage() {
+function ContentPageInner() {
   const searchParams = useSearchParams();
 
   // YouTube state
@@ -566,5 +566,13 @@ export default function ContentPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ContentPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">Loading...</div>}>
+      <ContentPageInner />
+    </Suspense>
   );
 }
