@@ -23,9 +23,10 @@ const platformColors: Record<string, string> = {
   x: "bg-black",
   medium: "bg-emerald-600",
   linkedin: "bg-blue-600",
+  tiktok: "bg-black",
 };
 
-type FilterType = "all" | "youtube" | "instagram" | "x" | "medium";
+type FilterType = "all" | "youtube" | "instagram" | "x" | "medium" | "tiktok";
 
 function ContentPageInner() {
   const searchParams = useSearchParams();
@@ -67,6 +68,17 @@ function ContentPageInner() {
   const [mediumInput, setMediumInput] = useState("");
   const [mediumError, setMediumError] = useState("");
 
+  // TikTok state
+  const [tiktokVideos, setTiktokVideos] = useState<ContentItem[]>([]);
+  const [tiktokProfile, setTiktokProfile] = useState<{
+    username: string;
+    displayName: string;
+    videoCount: number;
+  } | null>(null);
+  const [tiktokLoading, setTiktokLoading] = useState(false);
+  const [tiktokConnected, setTiktokConnected] = useState(false);
+  const [tiktokError, setTiktokError] = useState("");
+
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
   // Check for OAuth callbacks
@@ -74,11 +86,16 @@ function ContentPageInner() {
     if (searchParams.get("x") === "connected") {
       fetchXData();
     }
+    if (searchParams.get("tiktok") === "connected") {
+      fetchTiktokData();
+    }
     if (searchParams.get("error")) {
       setXError(searchParams.get("error") || "");
+      setTiktokError(searchParams.get("error") || "");
     }
     // Check if already connected
     checkXConnection();
+    checkTiktokConnection();
   }, [searchParams]);
 
   const checkXConnection = async () => {
@@ -134,6 +151,61 @@ function ContentPageInner() {
     setXConnected(false);
     setXProfile(null);
     setXTweets([]);
+  };
+
+  const checkTiktokConnection = async () => {
+    try {
+      const response = await fetch("/api/tiktok");
+      const data = await response.json();
+      if (data.connected) {
+        setTiktokConnected(true);
+        setTiktokProfile(data.profile);
+        setTiktokVideos(data.videos || []);
+      }
+    } catch {
+      // Not connected
+    }
+  };
+
+  const fetchTiktokData = async () => {
+    setTiktokLoading(true);
+    setTiktokError("");
+
+    try {
+      const response = await fetch("/api/tiktok");
+      const data = await response.json();
+
+      if (data.needsAuth) {
+        setTiktokConnected(false);
+        return;
+      }
+
+      if (data.error) {
+        setTiktokError(data.error);
+        return;
+      }
+
+      if (data.connected && data.profile) {
+        setTiktokConnected(true);
+        setTiktokProfile(data.profile);
+        setTiktokVideos(data.videos || []);
+      }
+    } catch {
+      setTiktokError("Failed to fetch TikTok data");
+    } finally {
+      setTiktokLoading(false);
+    }
+  };
+
+  const connectTiktok = () => {
+    window.location.href = "/api/auth/tiktok";
+  };
+
+  const disconnectTiktok = async () => {
+    await fetch("/api/tiktok", { method: "DELETE" });
+    setTiktokConnected(false);
+    setTiktokProfile(null);
+    setTiktokVideos([]);
   };
 
   const fetchInstagramMedia = async () => {
@@ -227,7 +299,7 @@ function ContentPageInner() {
   };
 
   // Combine and filter content
-  const allContent = [...youtubeVideos, ...instagramMedia, ...xTweets, ...mediumArticles];
+  const allContent = [...youtubeVideos, ...instagramMedia, ...xTweets, ...mediumArticles, ...tiktokVideos];
   const filteredContent =
     activeFilter === "all"
       ? allContent
@@ -247,14 +319,14 @@ function ContentPageInner() {
             <h2 className="text-2xl font-semibold">Content Library</h2>
           </div>
 
-          {(xError || mediumError) && (
+          {(xError || mediumError || tiktokError) && (
             <div className="bg-red-900/50 border border-red-800 rounded-lg p-4 mb-6">
-              <p className="text-red-200">{xError || mediumError}</p>
+              <p className="text-red-200">{xError || mediumError || tiktokError}</p>
             </div>
           )}
 
           {/* Platform Connections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
             {/* YouTube Connect */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
               <div className="flex items-center gap-3 mb-3">
@@ -402,6 +474,48 @@ function ContentPageInner() {
               </div>
             </div>
 
+            {/* TikTok Connect */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 bg-black border border-zinc-700 rounded-lg flex items-center justify-center">
+                  <span className="text-lg font-bold">♪</span>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm">TikTok</h3>
+                  <p className="text-xs text-zinc-500">
+                    {tiktokConnected && tiktokProfile
+                      ? `${tiktokVideos.length} videos`
+                      : "Connect"}
+                  </p>
+                </div>
+              </div>
+
+              {tiktokConnected ? (
+                <div className="flex gap-2">
+                  <button
+                    onClick={fetchTiktokData}
+                    disabled={tiktokLoading}
+                    className="flex-1 px-2 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium text-xs"
+                  >
+                    {tiktokLoading ? "..." : "Refresh"}
+                  </button>
+                  <button
+                    onClick={disconnectTiktok}
+                    className="px-2 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium text-xs text-red-400"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={connectTiktok}
+                  className="w-full px-2 py-1.5 bg-black border border-zinc-700 hover:bg-zinc-900 rounded-lg font-medium text-xs"
+                >
+                  Connect TikTok
+                </button>
+              )}
+            </div>
+
             {/* LinkedIn - Coming Soon */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 opacity-60">
               <div className="flex items-center gap-3 mb-3">
@@ -484,6 +598,18 @@ function ContentPageInner() {
                   Medium ({mediumArticles.length})
                 </button>
               )}
+              {tiktokVideos.length > 0 && (
+                <button
+                  onClick={() => setActiveFilter("tiktok")}
+                  className={`px-4 py-2 rounded-lg text-sm ${
+                    activeFilter === "tiktok"
+                      ? "bg-zinc-800 text-white"
+                      : "text-zinc-400 hover:bg-zinc-800"
+                  }`}
+                >
+                  TikTok ({tiktokVideos.length})
+                </button>
+              )}
             </div>
           )}
 
@@ -555,7 +681,7 @@ function ContentPageInner() {
           )}
 
           {/* Empty state */}
-          {filteredContent.length === 0 && !youtubeLoading && !instagramLoading && !xLoading && !mediumLoading && (
+          {filteredContent.length === 0 && !youtubeLoading && !instagramLoading && !xLoading && !mediumLoading && !tiktokLoading && (
             <div className="text-center py-16">
               <p className="text-zinc-500 mb-4">No content yet</p>
               <p className="text-zinc-600 text-sm">
