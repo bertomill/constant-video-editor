@@ -70,14 +70,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log("TikTok token exchange success:", {
+      hasAccessToken: !!tokenData.access_token,
+      hasRefreshToken: !!tokenData.refresh_token,
+      hasOpenId: !!tokenData.open_id,
+      expiresIn: tokenData.expires_in,
+    });
+
     // Create redirect response and set cookies on it
     const redirectUrl = new URL("/content?tiktok=connected", request.url);
     const response = NextResponse.redirect(redirectUrl);
 
+    // Determine if we're on HTTPS (production) or HTTP (localhost)
+    const isSecure = request.url.startsWith("https://");
+
     // Store tokens in cookies on the response
     response.cookies.set("tiktok_access_token", tokenData.access_token, {
       httpOnly: true,
-      secure: true,
+      secure: isSecure,
       sameSite: "lax",
       maxAge: tokenData.expires_in || 86400,
       path: "/",
@@ -86,7 +96,7 @@ export async function GET(request: NextRequest) {
     if (tokenData.refresh_token) {
       response.cookies.set("tiktok_refresh_token", tokenData.refresh_token, {
         httpOnly: true,
-        secure: true,
+        secure: isSecure,
         sameSite: "lax",
         maxAge: tokenData.refresh_expires_in || 60 * 60 * 24 * 365,
         path: "/",
@@ -97,13 +107,14 @@ export async function GET(request: NextRequest) {
     if (tokenData.open_id) {
       response.cookies.set("tiktok_open_id", tokenData.open_id, {
         httpOnly: true,
-        secure: true,
+        secure: isSecure,
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 365,
         path: "/",
       });
     }
 
+    console.log("Setting cookies with secure:", isSecure);
     return response;
   } catch (err) {
     console.error("TikTok OAuth error:", err);
