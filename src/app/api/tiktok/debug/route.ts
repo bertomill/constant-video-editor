@@ -8,11 +8,11 @@ export async function GET() {
   const refreshToken = cookieStore.get("tiktok_refresh_token")?.value;
   const openId = cookieStore.get("tiktok_open_id")?.value;
 
-  // Try to decode if encoded
+  // Try to decode base64
   let accessToken = rawAccessToken;
   try {
     if (rawAccessToken) {
-      accessToken = decodeURIComponent(rawAccessToken);
+      accessToken = Buffer.from(rawAccessToken, "base64").toString("utf-8");
     }
   } catch {
     // Not encoded

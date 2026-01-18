@@ -12,8 +12,8 @@ export async function GET() {
     );
   }
 
-  // Decode the URL-encoded access token
-  const accessToken = decodeURIComponent(rawAccessToken);
+  // Decode the base64-encoded access token
+  const accessToken = Buffer.from(rawAccessToken, "base64").toString("utf-8");
 
   try {
     // Get user info
