@@ -18,6 +18,8 @@ export async function GET() {
     // Not encoded
   }
 
+  const testCookie = cookieStore.get("tiktok_test")?.value;
+
   return NextResponse.json({
     hasAccessToken: !!accessToken,
     accessTokenLength: accessToken?.length || 0,
@@ -27,6 +29,7 @@ export async function GET() {
     refreshTokenPreview: refreshToken ? refreshToken.slice(0, 20) + "..." : null,
     hasOpenId: !!openId,
     openId: openId,
+    testCookie: testCookie,
     allCookieNames: cookieStore.getAll().map(c => c.name),
   });
 }

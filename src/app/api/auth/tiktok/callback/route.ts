@@ -92,12 +92,22 @@ export async function GET(request: NextRequest) {
       path: "/",
     };
 
-    // URL-encode the access token in case it has special characters
-    const encodedAccessToken = encodeURIComponent(tokenData.access_token);
-    console.log("Setting access token cookie, encoded length:", encodedAccessToken.length);
+    // Store access token - try without encoding first
+    const accessToken = tokenData.access_token;
+    console.log("Access token details:", {
+      length: accessToken?.length,
+      type: typeof accessToken,
+      firstChars: accessToken?.slice(0, 30),
+      lastChars: accessToken?.slice(-20),
+    });
+
+    // Also set a test cookie to verify cookie setting works
+    response.cookies.set("tiktok_test", "cookie_works", cookieOptions);
 
     // Store tokens in cookies on the response
-    response.cookies.set("tiktok_access_token", encodedAccessToken, cookieOptions);
+    if (accessToken && typeof accessToken === "string") {
+      response.cookies.set("tiktok_access_token", accessToken, cookieOptions);
+    }
 
     if (tokenData.refresh_token) {
       response.cookies.set("tiktok_refresh_token", tokenData.refresh_token, cookieOptions);
