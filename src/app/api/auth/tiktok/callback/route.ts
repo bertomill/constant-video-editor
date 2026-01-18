@@ -80,7 +80,12 @@ export async function GET(request: NextRequest) {
     });
 
     // Create redirect response and set cookies on it
-    const redirectUrl = new URL("/content?tiktok=connected", request.url);
+    // Add debug info to URL temporarily
+    const redirectUrl = new URL("/content", request.url);
+    redirectUrl.searchParams.set("tiktok", "connected");
+    redirectUrl.searchParams.set("has_access", tokenData.access_token ? "yes" : "no");
+    redirectUrl.searchParams.set("access_len", String(tokenData.access_token?.length || 0));
+    redirectUrl.searchParams.set("has_refresh", tokenData.refresh_token ? "yes" : "no");
     const response = NextResponse.redirect(redirectUrl);
 
     // Use most permissive cookie settings for debugging
