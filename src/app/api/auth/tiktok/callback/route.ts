@@ -75,7 +75,8 @@ export async function GET(request: NextRequest) {
       hasRefreshToken: !!tokenData.refresh_token,
       hasOpenId: !!tokenData.open_id,
       expiresIn: tokenData.expires_in,
-      tokenPreview: tokenData.access_token?.slice(0, 20) + "...",
+      accessTokenLength: tokenData.access_token?.length,
+      accessTokenPreview: tokenData.access_token?.slice(0, 50),
     });
 
     // Create redirect response and set cookies on it
@@ -91,8 +92,12 @@ export async function GET(request: NextRequest) {
       path: "/",
     };
 
+    // URL-encode the access token in case it has special characters
+    const encodedAccessToken = encodeURIComponent(tokenData.access_token);
+    console.log("Setting access token cookie, encoded length:", encodedAccessToken.length);
+
     // Store tokens in cookies on the response
-    response.cookies.set("tiktok_access_token", tokenData.access_token, cookieOptions);
+    response.cookies.set("tiktok_access_token", encodedAccessToken, cookieOptions);
 
     if (tokenData.refresh_token) {
       response.cookies.set("tiktok_refresh_token", tokenData.refresh_token, cookieOptions);

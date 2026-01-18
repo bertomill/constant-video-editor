@@ -3,14 +3,17 @@ import { cookies } from "next/headers";
 
 export async function GET() {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get("tiktok_access_token")?.value;
+  const rawAccessToken = cookieStore.get("tiktok_access_token")?.value;
 
-  if (!accessToken) {
+  if (!rawAccessToken) {
     return NextResponse.json(
       { error: "Not connected to TikTok", needsAuth: true },
       { status: 401 }
     );
   }
+
+  // Decode the URL-encoded access token
+  const accessToken = decodeURIComponent(rawAccessToken);
 
   try {
     // Get user info
