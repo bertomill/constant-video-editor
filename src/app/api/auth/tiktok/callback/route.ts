@@ -70,8 +70,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Store tokens in cookies
-    cookieStore.set("tiktok_access_token", tokenData.access_token, {
+    // Create redirect response and set cookies on it
+    const redirectUrl = new URL("/content?tiktok=connected", request.url);
+    const response = NextResponse.redirect(redirectUrl);
+
+    // Store tokens in cookies on the response
+    response.cookies.set("tiktok_access_token", tokenData.access_token, {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
@@ -80,7 +84,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (tokenData.refresh_token) {
-      cookieStore.set("tiktok_refresh_token", tokenData.refresh_token, {
+      response.cookies.set("tiktok_refresh_token", tokenData.refresh_token, {
         httpOnly: true,
         secure: true,
         sameSite: "lax",
@@ -91,7 +95,7 @@ export async function GET(request: NextRequest) {
 
     // Store open_id for API calls
     if (tokenData.open_id) {
-      cookieStore.set("tiktok_open_id", tokenData.open_id, {
+      response.cookies.set("tiktok_open_id", tokenData.open_id, {
         httpOnly: true,
         secure: true,
         sameSite: "lax",
@@ -100,7 +104,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.redirect(new URL("/content?tiktok=connected", request.url));
+    return response;
   } catch (err) {
     console.error("TikTok OAuth error:", err);
     return NextResponse.redirect(
