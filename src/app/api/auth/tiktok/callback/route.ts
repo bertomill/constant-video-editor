@@ -75,46 +75,35 @@ export async function GET(request: NextRequest) {
       hasRefreshToken: !!tokenData.refresh_token,
       hasOpenId: !!tokenData.open_id,
       expiresIn: tokenData.expires_in,
+      tokenPreview: tokenData.access_token?.slice(0, 20) + "...",
     });
 
     // Create redirect response and set cookies on it
     const redirectUrl = new URL("/content?tiktok=connected", request.url);
     const response = NextResponse.redirect(redirectUrl);
 
-    // Determine if we're on HTTPS (production) or HTTP (localhost)
-    const isSecure = request.url.startsWith("https://");
+    // Use most permissive cookie settings for debugging
+    const cookieOptions = {
+      httpOnly: false, // Allow JS access for debugging
+      secure: false, // Allow HTTP
+      sameSite: "lax" as const,
+      maxAge: 86400 * 30, // 30 days
+      path: "/",
+    };
 
     // Store tokens in cookies on the response
-    response.cookies.set("tiktok_access_token", tokenData.access_token, {
-      httpOnly: true,
-      secure: isSecure,
-      sameSite: "lax",
-      maxAge: tokenData.expires_in || 86400,
-      path: "/",
-    });
+    response.cookies.set("tiktok_access_token", tokenData.access_token, cookieOptions);
 
     if (tokenData.refresh_token) {
-      response.cookies.set("tiktok_refresh_token", tokenData.refresh_token, {
-        httpOnly: true,
-        secure: isSecure,
-        sameSite: "lax",
-        maxAge: tokenData.refresh_expires_in || 60 * 60 * 24 * 365,
-        path: "/",
-      });
+      response.cookies.set("tiktok_refresh_token", tokenData.refresh_token, cookieOptions);
     }
 
     // Store open_id for API calls
     if (tokenData.open_id) {
-      response.cookies.set("tiktok_open_id", tokenData.open_id, {
-        httpOnly: true,
-        secure: isSecure,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 365,
-        path: "/",
-      });
+      response.cookies.set("tiktok_open_id", tokenData.open_id, cookieOptions);
     }
 
-    console.log("Setting cookies with secure:", isSecure);
+    console.log("Cookies set on response, redirecting to:", redirectUrl.toString());
     return response;
   } catch (err) {
     console.error("TikTok OAuth error:", err);
