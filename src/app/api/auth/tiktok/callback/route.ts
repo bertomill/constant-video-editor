@@ -73,7 +73,8 @@ export async function GET(request: NextRequest) {
     // Store tokens in cookies
     cookieStore.set("tiktok_access_token", tokenData.access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
+      sameSite: "lax",
       maxAge: tokenData.expires_in || 86400,
       path: "/",
     });
@@ -81,7 +82,8 @@ export async function GET(request: NextRequest) {
     if (tokenData.refresh_token) {
       cookieStore.set("tiktok_refresh_token", tokenData.refresh_token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
+        sameSite: "lax",
         maxAge: tokenData.refresh_expires_in || 60 * 60 * 24 * 365,
         path: "/",
       });
@@ -91,7 +93,8 @@ export async function GET(request: NextRequest) {
     if (tokenData.open_id) {
       cookieStore.set("tiktok_open_id", tokenData.open_id, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
+        sameSite: "lax",
         maxAge: 60 * 60 * 24 * 365,
         path: "/",
       });
